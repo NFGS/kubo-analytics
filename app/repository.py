@@ -1,8 +1,20 @@
 """Consultas de tablero sobre el modelo de lectura de MongoDB."""
 
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
+from .config import settings
 from .db import sales_collection
+
+# Zona horaria del negocio. Las fechas se guardan en UTC, pero el dia comercial
+# se calcula aqui: una venta de las 20:00 en Colombia pertenece a ese dia.
+BUSINESS_TZ = ZoneInfo(settings.timezone)
+
+
+def _start_of_business_day(moment: datetime | None = None) -> datetime:
+    """Medianoche del dia comercial, expresada en UTC para poder consultar."""
+    local = (moment or datetime.now(timezone.utc)).astimezone(BUSINESS_TZ)
+    return local.replace(hour=0, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
 
 
 def _base_match(tenant_id: str, only_completed: bool = True) -> dict:
@@ -14,8 +26,7 @@ def _base_match(tenant_id: str, only_completed: bool = True) -> dict:
 
 def summary(tenant_id: str) -> dict:
     """Indicadores principales del negocio."""
-    now = datetime.now(timezone.utc)
-    start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    start_of_day = _start_of_business_day()
 
     totals = list(
         sales_collection.aggregate(
@@ -85,7 +96,13 @@ def sales_by_day(tenant_id: str, days: int = 14) -> list[dict]:
             },
             {
                 "$group": {
-                    "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$sold_at"}},
+                    "_id": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": "$sold_at",
+                            "timezone": settings.timezone,
+                        }
+                    },
                     "revenue": {"$sum": "$total"},
                     "sales_count": {"$sum": 1},
                 }
