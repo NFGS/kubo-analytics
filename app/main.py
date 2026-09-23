@@ -122,7 +122,7 @@ def dashboard_recent_sales(
 @api.get("/dashboard/rotation", tags=["tablero"])
 def dashboard_rotation(tenant: str = Depends(tenant_id)) -> dict:
     """Productos con mas salida en los ultimos 7 dias."""
-    return {"data": repository.low_stock_alerts(tenant)}
+    return {"data": repository.product_rotation(tenant)}
 
 
 app.include_router(api)

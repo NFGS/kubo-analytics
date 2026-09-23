@@ -219,8 +219,8 @@ def recent_sales(tenant_id: str, limit: int = 10) -> list[dict]:
     ]
 
 
-def low_stock_alerts(tenant_id: str) -> list[dict]:
-    """Resumen de unidades vendidas por producto en los ultimos 7 dias."""
+def product_rotation(tenant_id: str) -> list[dict]:
+    """Productos con mas salida en los ultimos 7 dias (rotacion)."""
     since = datetime.now(timezone.utc) - timedelta(days=7)
 
     rows = sales_collection.aggregate(
