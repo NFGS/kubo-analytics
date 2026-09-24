@@ -1,0 +1,13 @@
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+stages: [test]
+
+analytics:test:
+  stage: test
+  image: python:3.13-slim
+  script:
+    - pip install --quiet -r requirements-dev.txt
+    # Gate de cobertura de dominio: el modulo de procesamiento de eventos.
+    - pytest -q --cov=app.processing --cov-report=term --cov-fail-under=80

@@ -78,3 +78,10 @@ uvicorn app.main:app --reload --port 8084
 pip install -r requirements-dev.txt
 pytest -q
 ```
+
+## Observabilidad y calidad (Fase 2)
+
+- **Trazas OpenTelemetry**: `app/tracing.py` instrumenta FastAPI y exporta OTLP
+  solo si hay collector configurado.
+- **Cobertura**: gate de **80 %** sobre el módulo de dominio (`app.processing`)
+  con pytest-cov; hoy 91 %.

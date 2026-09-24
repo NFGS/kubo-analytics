@@ -11,6 +11,7 @@ from .config import settings
 from .consumer import start_consumer_thread, state as consumer_state
 from .db import ensure_indexes, ping
 from .projection import process_event
+from .tracing import setup_tracing
 
 logging.basicConfig(
     level=settings.log_level,
@@ -35,15 +36,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+setup_tracing(app)
+
 api = APIRouter(prefix="/api/v1")
 
 
-def tenant_id(x_tenant_id: str | None = Header(default=None, alias="X-Tenant-Id")) -> str:
+def tenant_id(
+    x_tenant_id: str | None = Header(default=None, alias="X-Tenant-Id"),
+) -> str:
     """La identidad llega verificada desde el API Gateway."""
     if not x_tenant_id:
         raise HTTPException(
             status_code=401,
-            detail={"code": "UNAUTHENTICATED", "message": "La peticion no trae identidad verificada"},
+            detail={
+                "code": "UNAUTHENTICATED",
+                "message": "La peticion no trae identidad verificada",
+            },
         )
     return x_tenant_id
 
@@ -67,7 +75,9 @@ def health() -> dict:
         "service": "kubo-analytics",
         "db": database,
         "consumer": consumer_state(),
-        "time": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+        "time": __import__("datetime")
+        .datetime.now(__import__("datetime").timezone.utc)
+        .isoformat(),
     }
 
 
