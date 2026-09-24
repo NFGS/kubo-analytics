@@ -8,20 +8,29 @@ Se omiten cuando no hay Docker disponible (por ejemplo, en un runner de CI sin
 demonio), de modo que la suite unitaria sigue corriendo en cualquier entorno.
 """
 
+import os
 import shutil
+from pathlib import Path
 
 import pytest
 
 
 def _docker_disponible() -> bool:
-    """Docker en el PATH y la libreria de testcontainers instalada."""
-    if shutil.which("docker") is None:
-        return False
+    """Docker accesible y la libreria de testcontainers instalada.
+
+    Basta el socket (o `DOCKER_HOST`): el CLI no es necesario, testcontainers
+    habla con el demonio directamente. Exigir el binario `docker` obligaba a
+    saltar estas pruebas en contenedores con el socket montado.
+    """
     try:
         import testcontainers.mongodb  # noqa: F401
     except ImportError:
         return False
-    return True
+
+    if shutil.which("docker") is not None:
+        return True
+
+    return Path("/var/run/docker.sock").exists() or bool(os.environ.get("DOCKER_HOST"))
 
 
 pytestmark = pytest.mark.skipif(

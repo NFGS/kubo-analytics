@@ -1,3 +1,6 @@
 pytest>=8.3
+# El gate de cobertura del CI usa --cov/--cov-fail-under; sin el plugin
+# instalado la suite falla al parsear los argumentos.
+pytest-cov>=6.0
 httpx>=0.28
 testcontainers[mongodb]>=4.8
