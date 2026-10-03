@@ -60,7 +60,10 @@ def _project_sale(event: dict) -> None:
     now = datetime.now(timezone.utc)
 
     sales_collection.update_one(
-        {"sale_id": data.get("sale_id")},
+        # El filtro incluye el negocio: una reentrega no puede reescribir la
+        # venta de otro negocio aunque compartiera el sale_id (defensa en
+        # profundidad; el id ya es unico).
+        {"sale_id": data.get("sale_id"), "tenant_id": event.get("tenant_id")},
         {
             "$set": {
                 "sale_id": data.get("sale_id"),

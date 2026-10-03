@@ -32,7 +32,7 @@ kubo-erp ──sale.created──▶ RabbitMQ ──▶ consumidor (idempotente)
 | Método | Ruta | Descripción |
 | --- | --- | --- |
 | GET | `/api/v1/health` | Estado del servicio, Mongo y consumidor |
-| POST | `/api/v1/events` | Vía de respaldo para reenviar eventos por HTTP |
+| POST | `/api/v1/events` | Vía de respaldo para reenviar eventos por HTTP; el negocio lo impone la identidad verificada, no el cuerpo |
 | GET | `/api/v1/dashboard/summary` | Ventas, ingreso, ticket promedio, unidades, hoy |
 | GET | `/api/v1/dashboard/sales-by-day` | Serie diaria (`days`) |
 | GET | `/api/v1/dashboard/top-products` | Productos más vendidos (`limit`) |
@@ -75,13 +75,17 @@ uvicorn app.main:app --reload --port 8084
 ## Pruebas
 
 ```bash
-pip install -r requirements-dev.txt
-pytest -q
+./kubo-infra/scripts/analytics-tests.sh
 ```
+
+**8 pruebas**: 6 unitarias de conversión y 2 de integración con MongoDB real
+(testcontainers, `mongo:8.2` como el compose) que verifican la deduplicación por
+índice único y la proyección de la venta. La cobertura del módulo de dominio
+(`app.processing`) se vigila con gate de **80 %**; hoy **93 %**.
 
 ## Observabilidad y calidad (Fase 2)
 
 - **Trazas OpenTelemetry**: `app/tracing.py` instrumenta FastAPI y exporta OTLP
   solo si hay collector configurado.
 - **Cobertura**: gate de **80 %** sobre el módulo de dominio (`app.processing`)
-  con pytest-cov; hoy 91 %.
+  con pytest-cov; hoy 93 %.

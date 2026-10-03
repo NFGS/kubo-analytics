@@ -86,8 +86,21 @@ def ingest_event(event: EventIn, _tenant: str = Depends(tenant_id)) -> dict:
     """
     Via de respaldo para reenviar eventos por HTTP cuando el bus no esta
     disponible (recuperacion o carga inicial). La via normal es RabbitMQ.
+
+    El negocio lo impone la identidad verificada del gateway, nunca el cuerpo:
+    un evento no puede escribir en el modelo de lectura de otro negocio.
     """
-    outcome = process_event(event.model_dump())
+    payload = event.model_dump()
+
+    if payload.get("tenant_id") and payload["tenant_id"] != _tenant:
+        logger.warning(
+            "evento con negocio distinto al verificado (event_id=%s); se impone el verificado",
+            payload.get("event_id"),
+        )
+
+    payload["tenant_id"] = _tenant
+
+    outcome = process_event(payload)
     return {"status": outcome}
 
 
