@@ -43,7 +43,7 @@ def collections():
     from pymongo import MongoClient
     from testcontainers.mongodb import MongoDbContainer
 
-    with MongoDbContainer("mongo:8") as mongo:
+    with MongoDbContainer("mongo:8.2") as mongo:
         client = MongoClient(mongo.get_connection_url())
         database = client["kubo_analytics_test"]
         events = database["events"]
