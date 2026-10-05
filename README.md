@@ -1,5 +1,7 @@
 # kubo-analytics
 
+> Parte del proyecto **Kubo** — [kubo-workspace](https://github.com/NFGS/kubo-workspace) (ERP + CRM autoalojable para PYMES).
+
 Servicio de analítica de Kubo: consume los eventos del negocio, construye un
 modelo de lectura en MongoDB y expone el tablero de indicadores.
 
