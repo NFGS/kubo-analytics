@@ -1,5 +1,7 @@
 # kubo-analytics
 
+[![CI](https://github.com/NFGS/kubo-analytics/actions/workflows/ci.yml/badge.svg)](https://github.com/NFGS/kubo-analytics/actions/workflows/ci.yml)
+
 > Parte del proyecto **Kubo** — [kubo-workspace](https://github.com/NFGS/kubo-workspace) (ERP + CRM autoalojable para PYMES).
 
 Servicio de analítica de Kubo: consume los eventos del negocio, construye un
